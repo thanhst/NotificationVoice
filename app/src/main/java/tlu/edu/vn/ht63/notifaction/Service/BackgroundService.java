@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -31,6 +32,13 @@ public class BackgroundService extends Service {
     private Observer<List<Message>> messageObserver;
 
     private static TextToSpeech textToSpeech;
+    private Handler handler = new Handler();
+    private Runnable pingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            handler.postDelayed(this, 15 * 60 * 1000);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -38,7 +46,13 @@ public class BackgroundService extends Service {
         createNotificationChannel();
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Đưa Activity đã tồn tại lên foreground
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        //        handler.post(pingRunnable);
 
         Notification notification = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -47,6 +61,7 @@ public class BackgroundService extends Service {
                     .setContentText("Đang giám sát thông báo")
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(android.R.drawable.ic_notification_overlay)
+                    .setOngoing(true)
                     .build();
         }
 
@@ -54,9 +69,18 @@ public class BackgroundService extends Service {
             if (status == TextToSpeech.SUCCESS) {
                 int langResult = textToSpeech.setLanguage(Locale.getDefault());
                 if (langResult == TextToSpeech.LANG_MISSING_DATA
-                        || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        || langResult == TextToSpeech.LANG_NOT_SUPPORTED || Locale.getDefault().equals(new Locale("Tiếng Việt", "VN"))) {
+//                    Intent installIntent = new Intent();
+//                    installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+//                    installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  // Thêm cờ này
+//                    startActivity(installIntent);
+                    Intent installIntent = new Intent();
+                    installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(installIntent);
                 }
             } else {
+//                Log.d("Error speech","Lôi");
             }
         });
 
@@ -107,28 +131,30 @@ public class BackgroundService extends Service {
     }
 
     private void readMessages() {
-        messageObserver  = messages -> {
+//        Log.d("Text", "Readmesssage");
+        messageObserver = messages -> {
             if (messages != null && !messages.isEmpty()) {
                 Message firstMessage = messages.get(0);
                 String textToRead = "Có thông báo!";
-                String content= CheckContentMessageHelper.checkMessageBanking(firstMessage.getTitle(),firstMessage.getContent());
-                if(content!=null){
-                    textToRead = "Thông báo: Biến động số dư , Giao dịch: "+ content;
-                }
-                else{
+                String content = CheckContentMessageHelper.checkMessageBanking(firstMessage.getTitle(), firstMessage.getContent());
+                if (content != null) {
+                    textToRead = "Thông báo: Biến động số dư , Giao dịch: " + content;
+                } else {
                     textToRead = "Thông báo: " + firstMessage.getTitle() + ", Nội dung : " + firstMessage.getContent();
                 }
-//                Log.d("Text", textToRead);
+                Log.d("Text", textToRead);
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(String utteranceId) {
                     }
+
                     @Override
                     public void onDone(String utteranceId) {
                         if ("message_utterance_id".equals(utteranceId)) {
                             MessageRepo.removeMessage();
                         }
                     }
+
                     @Override
                     public void onError(String utteranceId) {
                     }
@@ -136,9 +162,10 @@ public class BackgroundService extends Service {
                 if (textToSpeech != null && !textToSpeech.isSpeaking()) {
                     textToSpeech.speak(textToRead, TextToSpeech.QUEUE_ADD, null, "message_utterance_id");
                 } else {
+                    Log.d("Text", "Không có text");
                 }
             } else {
-    //                Log.d("TextToSpeech", "No messages to read.");
+                //                Log.d("TextToSpeech", "No messages to read.");
             }
         };
         MessageRepo.getMsgList().observeForever(messageObserver);

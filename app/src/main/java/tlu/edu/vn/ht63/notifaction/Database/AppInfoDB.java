@@ -44,11 +44,14 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
 
     public void addAppInfo(AppInfo appInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_PACKAGE_NAME, appInfo.getPackageName());
-        values.put(COLUMN_APP_NAME, appInfo.getName());
-
-        db.insert(TABLE_NAME, null, values);
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_PACKAGE_NAME, appInfo.getPackageName());
+            values.put(COLUMN_APP_NAME, appInfo.getName());
+            db.insert(TABLE_NAME, null, values);
+        } finally {
+            db.close();
+        }
     }
 
     public List<AppInfo> getAllAppInfo() {
@@ -64,7 +67,7 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
             }
             cursor.close();
         }
-
+        db.close();
         return appInfoList;
     }
 
@@ -88,5 +91,6 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
     public void deleteAppInfo(AppInfo appInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_NAME, COLUMN_PACKAGE_NAME + " = ? and " +COLUMN_APP_NAME + " = ?", new String[]{appInfo.getPackageName(),appInfo.getName()});
+        db.close();
     }
 }

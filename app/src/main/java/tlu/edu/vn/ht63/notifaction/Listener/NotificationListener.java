@@ -23,6 +23,7 @@ public class NotificationListener extends NotificationListenerService {
         if (isListeningEnabled) {
             AppInfo app = new AppInfo(null,sbn.getPackageName(),null);
             if(BinarySearch.search(AppPermissionRepo.getAppPermission(),app)){
+//                Log.d("AddMessage","Add");
                 Message msg = new Message(
                         sbn.getPackageName(),
                         sbn.getNotification().extras.getCharSequence("android.title").toString(),
