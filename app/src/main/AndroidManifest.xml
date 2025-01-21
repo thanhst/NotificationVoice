@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <queries>
+        <package android:name="com.zing.zalo" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.orca"/>
+        <package android:name="com.shopee.vn"/>
+        <package android:name="com.vietinbank.ipay"/>
+        <package android:name="com.microsoft.office.outlook"/>
+        <package android:name="com.discord"/>
+        <package android:name="com.mservice.momotransfer"/>
+        <package android:name="com.vnpay.Agribank3g"/>
+        <package android:name="com.mbmobile"/>
+        <package android:name="vn.com.techcombank.bb.app"/>
+        <package android:name="com.sacombank.ewallet"/>
+        <package android:name="org.telegram.messenger"/>
+        <package android:name="com.VCB"/>
+        <package android:name="com.vnpay.vpbankonline"/>
+<!--        <package android:name=""/>-->
+
+    </queries>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Notifaction"
+        tools:targetApi="31">
+        <activity
+            android:name=".Activity.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Notifaction">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service android:name=".Service.BackgroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.FOREGROUND_SERVICE" />
+        <service
+            android:name=".Listener.NotificationListener"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
