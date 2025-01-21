@@ -55,6 +55,6 @@ public class AppInfo implements Serializable,Comparable<AppInfo> {
     }
     @Override
     public int compareTo(AppInfo other) {
-        return this.packageName.compareTo(other.packageName);
+        return this.name.compareTo(other.name);
     }
 }

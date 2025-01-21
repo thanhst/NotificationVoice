@@ -1,5 +1,7 @@
 package tlu.edu.vn.ht63.notifaction.Listener;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -21,16 +23,19 @@ public class NotificationListener extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
         if (isListeningEnabled) {
-            AppInfo app = new AppInfo(null,sbn.getPackageName(),null);
-            if(BinarySearch.search(AppPermissionRepo.getAppPermission(),app)){
-//                Log.d("AddMessage","Add");
-                Message msg = new Message(
-                        sbn.getPackageName(),
-                        sbn.getNotification().extras.getCharSequence("android.title").toString(),
-                        sbn.getNotification().extras.getCharSequence("android.text").toString()
-                );
-                MessageRepo.addMessage(msg);
+            try {
+                if (BinarySearch.search(AppPermissionRepo.getAppPermission(),
+                        new AppInfo(getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(sbn.getPackageName(), 0)).toString(), sbn.getPackageName(), null))) {
+                    MessageRepo.addMessage(new Message(
+                            sbn.getPackageName(),
+                            sbn.getNotification().extras.getCharSequence("android.title").toString(),
+                            sbn.getNotification().extras.getCharSequence("android.text").toString()
+                    ));
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new RuntimeException(e);
             }
+
         }
     }
 

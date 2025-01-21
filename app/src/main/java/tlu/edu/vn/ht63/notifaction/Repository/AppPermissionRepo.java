@@ -47,4 +47,12 @@ public class AppPermissionRepo {
             }
         });
     }
+    public static void shortListAppByPackageName(){
+        appPermission.sort(new Comparator<AppInfo>() {
+            @Override
+            public int compare(AppInfo app1, AppInfo app2) {
+                return app1.getPackageName().compareTo(app2.getPackageName());
+            }
+        });
+    }
 }

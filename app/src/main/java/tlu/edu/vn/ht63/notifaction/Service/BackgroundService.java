@@ -69,15 +69,11 @@ public class BackgroundService extends Service {
             if (status == TextToSpeech.SUCCESS) {
                 int langResult = textToSpeech.setLanguage(Locale.getDefault());
                 if (langResult == TextToSpeech.LANG_MISSING_DATA
-                        || langResult == TextToSpeech.LANG_NOT_SUPPORTED || Locale.getDefault().equals(new Locale("Tiếng Việt", "VN"))) {
+                        || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
 //                    Intent installIntent = new Intent();
 //                    installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
 //                    installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  // Thêm cờ này
 //                    startActivity(installIntent);
-                    Intent installIntent = new Intent();
-                    installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                    installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(installIntent);
                 }
             } else {
 //                Log.d("Error speech","Lôi");
@@ -131,7 +127,7 @@ public class BackgroundService extends Service {
     }
 
     private void readMessages() {
-//        Log.d("Text", "Readmesssage");
+//        Log.d("Text", "Không có text");
         messageObserver = messages -> {
             if (messages != null && !messages.isEmpty()) {
                 Message firstMessage = messages.get(0);
@@ -142,7 +138,7 @@ public class BackgroundService extends Service {
                 } else {
                     textToRead = "Thông báo: " + firstMessage.getTitle() + ", Nội dung : " + firstMessage.getContent();
                 }
-                Log.d("Text", textToRead);
+//                Log.d("Text", textToRead);
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(String utteranceId) {

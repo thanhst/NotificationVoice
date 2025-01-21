@@ -44,14 +44,10 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
 
     public void addAppInfo(AppInfo appInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
-        try {
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_PACKAGE_NAME, appInfo.getPackageName());
-            values.put(COLUMN_APP_NAME, appInfo.getName());
-            db.insert(TABLE_NAME, null, values);
-        } finally {
-            db.close();
-        }
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PACKAGE_NAME, appInfo.getPackageName());
+        values.put(COLUMN_APP_NAME, appInfo.getName());
+        db.insert(TABLE_NAME, null, values);
     }
 
     public List<AppInfo> getAllAppInfo() {
@@ -63,11 +59,10 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
             while (cursor.moveToNext()) {
                 String packageName = cursor.getString(0);
                 String appName = cursor.getString(1);
-                appInfoList.add(new AppInfo(appName,packageName,null));
+                appInfoList.add(new AppInfo(appName, packageName, null));
             }
             cursor.close();
         }
-        db.close();
         return appInfoList;
     }
 
@@ -84,13 +79,12 @@ public class AppInfoDB extends android.database.sqlite.SQLiteOpenHelper {
         values.put(COLUMN_APP_NAME, appInfo.getName());
 
         // Cập nhật theo id
-        return db.update(TABLE_NAME, values, COLUMN_PACKAGE_NAME + " = ? and " +COLUMN_APP_NAME + " = ?" , new String[]{appInfo.getPackageName(),appInfo.getName()});
+        return db.update(TABLE_NAME, values, COLUMN_PACKAGE_NAME + " = ? and " + COLUMN_APP_NAME + " = ?", new String[]{appInfo.getPackageName(), appInfo.getName()});
     }
 
     // Xóa AppInfo
     public void deleteAppInfo(AppInfo appInfo) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_NAME, COLUMN_PACKAGE_NAME + " = ? and " +COLUMN_APP_NAME + " = ?", new String[]{appInfo.getPackageName(),appInfo.getName()});
-        db.close();
+        db.delete(TABLE_NAME, COLUMN_PACKAGE_NAME + " = ? and " + COLUMN_APP_NAME + " = ?", new String[]{appInfo.getPackageName(), appInfo.getName()});
     }
 }

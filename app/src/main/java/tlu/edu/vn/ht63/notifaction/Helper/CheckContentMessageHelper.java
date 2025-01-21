@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class CheckContentMessageHelper {
     public static String checkMessageBanking(String title,String content) {
-        String titleRegex = ".*Biến động số dư.*";
+        String titleRegex = ".*([Bb]iến động số dư|[Aa]gribank).*";
         String contentRegex = "([+-]?\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?\\s?VND)";
 
         Pattern titlePattern = Pattern.compile(titleRegex);
