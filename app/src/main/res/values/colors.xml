@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="switch_active_track">#4CAF50</color>  <!-- Màu xanh khi bật -->
+    <color name="switch_inactive_track">#BDBDBD</color>  <!-- Màu xám khi tắt -->
+    <color name="switch_active_thumb">#FFFFFF</color>
+    <color name="switch_inactive_thumb">#616161</color>
 </resources>

@@ -7,7 +7,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import tlu.edu.vn.ht63.notifaction.Helper.BinarySearch;
+import tlu.edu.vn.ht63.notifaction.Model.AppInfo;
 import tlu.edu.vn.ht63.notifaction.Model.Message;
+import tlu.edu.vn.ht63.notifaction.Repository.AppPermissionRepo;
 import tlu.edu.vn.ht63.notifaction.Repository.MessageRepo;
 
 public class NotificationListener extends NotificationListenerService {
@@ -18,13 +21,15 @@ public class NotificationListener extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
         if (isListeningEnabled) {
-            String packageName = sbn.getPackageName();
-            CharSequence notificationTitle = sbn.getNotification().extras.getCharSequence("android.title");
-            CharSequence notificationText = sbn.getNotification().extras.getCharSequence("android.text");
-            Log.d("Package", packageName);
-            Message msg = new Message(packageName, notificationTitle.toString(), notificationText.toString());
-            MessageRepo.addMessage(msg);
-//            Log.d("Size msg", String.valueOf(MessageRepo.getMsgList().getValue().size()) + notificationText);
+            AppInfo app = new AppInfo(null,sbn.getPackageName(),null);
+            if(BinarySearch.search(AppPermissionRepo.getAppPermission(),app)){
+                Message msg = new Message(
+                        sbn.getPackageName(),
+                        sbn.getNotification().extras.getCharSequence("android.title").toString(),
+                        sbn.getNotification().extras.getCharSequence("android.text").toString()
+                );
+                MessageRepo.addMessage(msg);
+            }
         }
     }
 

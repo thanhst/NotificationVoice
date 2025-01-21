@@ -19,6 +19,7 @@ public class SharedPrefHelper {
     // Lấy trạng thái service (đang chạy hay không)
     public static boolean isServiceRunning(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(KEY_SERVICE_RUNNING, false); // Default: false (không chạy)
+        return sharedPreferences.getBoolean(KEY_SERVICE_RUNNING, false);
     }
+
 }

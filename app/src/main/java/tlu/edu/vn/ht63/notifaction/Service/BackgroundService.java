@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 
 import tlu.edu.vn.ht63.notifaction.Activity.MainActivity;
+import tlu.edu.vn.ht63.notifaction.Helper.CheckContentMessageHelper;
+import tlu.edu.vn.ht63.notifaction.Helper.SharedPrefHelper;
 import tlu.edu.vn.ht63.notifaction.Listener.NotificationListener;
 import tlu.edu.vn.ht63.notifaction.Model.Message;
 import tlu.edu.vn.ht63.notifaction.Repository.MessageRepo;
@@ -37,9 +39,7 @@ public class BackgroundService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Đưa Activity đã tồn tại lên foreground
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//        Log.d("BackgroundService", "Service đã được tạo.");
 
-        // Tạo thông báo cho Foreground Service
         Notification notification = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notification = new Notification.Builder(this, CHANNEL_ID)
@@ -50,16 +50,13 @@ public class BackgroundService extends Service {
                     .build();
         }
 
-        // Khởi tạo TextToSpeech
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 int langResult = textToSpeech.setLanguage(Locale.getDefault());
                 if (langResult == TextToSpeech.LANG_MISSING_DATA
                         || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                    Log.e("TTS", "Language is not supported or missing data.");
                 }
             } else {
-//                Log.e("TTS", "Initialization failed.");
             }
         });
 
@@ -80,7 +77,6 @@ public class BackgroundService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopForeground(true);
-//        Log.d("BackgroundService", "BG is being destroyed.");
         NotificationListener.setListeningEnabled(false);
         if (messageObserver != null) {
             MessageRepo.getMsgList().removeObserver(messageObserver);
@@ -89,7 +85,7 @@ public class BackgroundService extends Service {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
-
+        SharedPrefHelper.setServiceRunning(this, false);  // Lưu trạng thái service đã dừng
         stopSelf();
     }
 
@@ -111,37 +107,38 @@ public class BackgroundService extends Service {
     }
 
     private void readMessages() {
-//        Log.e("TextToSpeech", "TextToSpeech is ready or already speaking.");
         messageObserver  = messages -> {
             if (messages != null && !messages.isEmpty()) {
-                // Lấy thông báo đầu tiên trong danh sách
                 Message firstMessage = messages.get(0);
-                String textToRead = "Thông báo: " + firstMessage.getTitle() + ", Nội dung thông báo : " + firstMessage.getContent();
-                Log.d("Text", textToRead);
+                String textToRead = "Có thông báo!";
+                String content= CheckContentMessageHelper.checkMessageBanking(firstMessage.getTitle(),firstMessage.getContent());
+                if(content!=null){
+                    textToRead = "Thông báo: Biến động số dư , Giao dịch: "+ content;
+                }
+                else{
+                    textToRead = "Thông báo: " + firstMessage.getTitle() + ", Nội dung : " + firstMessage.getContent();
+                }
+//                Log.d("Text", textToRead);
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(String utteranceId) {
                     }
-
                     @Override
                     public void onDone(String utteranceId) {
                         if ("message_utterance_id".equals(utteranceId)) {
                             MessageRepo.removeMessage();
                         }
                     }
-
                     @Override
                     public void onError(String utteranceId) {
-//                        Log.e("TextToSpeech", "Error in speech synthesis.");
                     }
                 });
                 if (textToSpeech != null && !textToSpeech.isSpeaking()) {
                     textToSpeech.speak(textToRead, TextToSpeech.QUEUE_ADD, null, "message_utterance_id");
                 } else {
-//                    Log.e("TextToSpeech", "TextToSpeech is not ready or already speaking.");
                 }
             } else {
-                Log.d("TextToSpeech", "No messages to read.");
+    //                Log.d("TextToSpeech", "No messages to read.");
             }
         };
         MessageRepo.getMsgList().observeForever(messageObserver);

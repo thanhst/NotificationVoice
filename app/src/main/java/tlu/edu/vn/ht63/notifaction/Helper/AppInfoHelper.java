@@ -7,6 +7,8 @@ import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import tlu.edu.vn.ht63.notifaction.Model.AppInfo;
@@ -15,7 +17,6 @@ public class AppInfoHelper {
 
     private Context context;
     private List<AppInfo> appInfos = new ArrayList<>();
-    private static List<String> appChooser = new ArrayList<>();
 
     public AppInfoHelper(Context context) {
         this.context = context;
@@ -45,11 +46,18 @@ public class AppInfoHelper {
             Drawable appIcon = appInfo.loadIcon(context.getPackageManager());
             AppInfo app = new AppInfo(appName,packageName,appIcon);
             appInfos.add(app);
-//            Log.d("Package",packageName);
         }
     }
 
+
     public List<AppInfo> getAppInfos(){
+        displayAppInfo();
+        Collections.sort(appInfos,new Comparator<AppInfo>() {
+            @Override
+            public int compare(AppInfo app1, AppInfo app2) {
+                return app1.getName().compareTo(app2.getName());
+            }
+        });
         return appInfos;
     }
 }

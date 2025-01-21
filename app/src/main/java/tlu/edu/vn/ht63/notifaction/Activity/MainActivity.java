@@ -10,6 +10,7 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -20,11 +21,15 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
+import tlu.edu.vn.ht63.notifaction.Database.AppInfoDB;
 import tlu.edu.vn.ht63.notifaction.Helper.AppInfoHelper;
 import tlu.edu.vn.ht63.notifaction.Helper.SharedPrefHelper;
 import tlu.edu.vn.ht63.notifaction.Model.AppInfo;
 import tlu.edu.vn.ht63.notifaction.PermissionEvent.PermissionUtils;
 import tlu.edu.vn.ht63.notifaction.Recyclerview.AppAdapter;
+import tlu.edu.vn.ht63.notifaction.Repository.AppPermissionRepo;
 import tlu.edu.vn.ht63.notifaction.Service.BackgroundService;
 import tlu.edu.vn.ht63.notifaction.databinding.ActivityMainBinding;
 
@@ -40,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnStartService = findViewById(R.id.btnStartService);
         Button btnStopService = findViewById(R.id.btnStopService);
 
-        if(!PermissionUtils.hasUsageStatsPermission(this)){
+        if (!PermissionUtils.hasUsageStatsPermission(this)) {
             PermissionUtils.requestUsageStatsPermission(this);
         }
         if (SharedPrefHelper.isServiceRunning(this)) {
@@ -53,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
         if (!isNotificationListenerEnabled()) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
             startActivity(intent);
+        }
+        try {
+            AppPermissionRepo.init(this);
+        } catch (Exception ignored) {
         }
 
         Intent serviceIntent = new Intent(MainActivity.this, BackgroundService.class);
@@ -76,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         AppInfoHelper appHelper = new AppInfoHelper(this);
-        appHelper.displayAppInfo();
         RecyclerView recyclerViewApp = findViewById(R.id.recyclerViewApp);
-        recyclerViewApp.setAdapter(new AppAdapter(appHelper.getAppInfos(),getPackageManager()));
-        recyclerViewApp.setLayoutManager(new GridLayoutManager(this,1));
+        recyclerViewApp.setAdapter(new AppAdapter(appHelper.getAppInfos()));
+        recyclerViewApp.setLayoutManager(new GridLayoutManager(this, 1));
     }
+
     private boolean isNotificationListenerEnabled() {
         String enabledListeners = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
         return enabledListeners != null && enabledListeners.contains(getPackageName());

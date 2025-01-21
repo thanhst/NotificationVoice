@@ -2,7 +2,9 @@ package tlu.edu.vn.ht63.notifaction.Model;
 
 import android.graphics.drawable.Drawable;
 
-public class AppInfo {
+import java.io.Serializable;
+
+public class AppInfo implements Serializable,Comparable<AppInfo> {
 
     public String getName() {
         return name;
@@ -36,5 +38,23 @@ public class AppInfo {
         this.name = name;
         this.packageName = packageName;
         this.icon = icon;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AppInfo appInfo = (AppInfo) obj;
+        return packageName.equals(appInfo.packageName) && name.equals(appInfo.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = packageName.hashCode();
+        result = 31 * result + name.hashCode(); // Kết hợp hash của packageName và name
+        return result;
+    }
+    @Override
+    public int compareTo(AppInfo other) {
+        return this.packageName.compareTo(other.packageName);
     }
 }
